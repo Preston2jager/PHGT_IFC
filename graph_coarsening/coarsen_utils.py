@@ -40,7 +40,11 @@ def get_coarsened_graph_from_dgl(hetero_g, args):
             C = pickle.load(f)
             g_coarsened = None
 
-    C = torch.tensor(C / C.sum(1), dtype=torch.float32)  # .to_sparse()
+    # Convert SciPy sparse matrix to a NumPy dense array first
+    C = C.toarray()  # Converts sparse matrix to NumPy array
+    C = C / C.sum(1, keepdims=True)  # Normalize rows properly
+    C = torch.tensor(C, dtype=torch.float32)  # Convert to PyTorch tensor
+    #C = torch.tensor(C / C.sum(1), dtype=torch.float32)  # .to_sparse()
     # set nan values to 0
     nan_mask = torch.isnan(C)
     C[nan_mask] = 0
